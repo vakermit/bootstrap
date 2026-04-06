@@ -39,4 +39,12 @@ Set-Location "$TMP_DIR\repo"
 
 Stop-Transcript
 
+if ($env:BOOTSTRAP_CLEANUP) {
+    Write-Host "BOOTSTRAP_CLEANUP set — removing $TMP_DIR"
+    Remove-Item -Recurse -Force $TMP_DIR -ErrorAction SilentlyContinue
+} else {
+    Write-Host "Temp repo kept at: $TMP_DIR\repo"
+    Write-Host "Set BOOTSTRAP_CLEANUP=1 to auto-remove on next run."
+}
+
 Write-Host "== Bootstrap complete =="

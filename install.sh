@@ -7,7 +7,16 @@ BRANCH="main"
 LOG_FILE="${HOME}/bootstrap.log"
 TMP_DIR="$(mktemp -d -t bootstrap-XXXX)"
 
-trap 'rm -rf "$TMP_DIR"' EXIT
+cleanup() {
+  if [ -n "${BOOTSTRAP_CLEANUP:-}" ]; then
+    echo "BOOTSTRAP_CLEANUP set — removing $TMP_DIR"
+    rm -rf "$TMP_DIR"
+  else
+    echo "Temp repo kept at: $TMP_DIR/repo"
+    echo "Set BOOTSTRAP_CLEANUP=1 to auto-remove on next run."
+  fi
+}
+trap cleanup EXIT
 
 echo "== Bootstrap Stage 0 ==" | tee -a "$LOG_FILE"
 echo "Temp dir: $TMP_DIR" | tee -a "$LOG_FILE"

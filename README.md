@@ -1,271 +1,139 @@
-🚀 Bootstrap v0.1
+# Bootstrap
 
-A cross-platform, idempotent development environment bootstrapper for macOS, Linux/WSL, and Windows.
+Cross-platform, idempotent development environment bootstrapper for **macOS**, **Linux/WSL**, and **Windows**.
 
-This project provides a clean, repeatable way to go from a fresh machine → fully configured dev environment using a single command.
+One command takes a fresh machine to a fully configured dev environment.
 
-⸻
+## Quick Start
 
-✨ Features
+**macOS / Linux**
 
-🧱 Core
-	•	Cross-platform support:
-	•	macOS
-	•	Linux (Ubuntu/Debian)
-	•	Windows (with WSL)
-	•	Idempotent (safe to re-run anytime)
-	•	Zero secrets in public repo
-	•	Modular architecture
-
-⸻
-
-🛠️ Developer Tooling
-	•	Git
-	•	GitHub CLI (gh) with browser auth
-	•	Visual Studio Code
-	•	Terminal setup:
-	•	macOS → iTerm2
-	•	Windows → Windows Terminal
-
-⸻
-
-🐍 Python Environment
-	•	pyenv for version management
-	•	uv for fast package + environment management
-	•	Installed versions:
-	•	Python 3.11
-	•	Python 3.14 (dev/latest)
-
-⸻
-
-🐳 Containers (No Docker Desktop)
-	•	macOS:
-	•	Colima (Docker runtime)
-	•	Local Kubernetes cluster
-	•	Linux / WSL:
-	•	Native Docker Engine
-	•	Windows:
-	•	Docker runs inside WSL
-
-⸻
-
-☁️ Cloud CLIs
-	•	AWS CLI (aws)
-	•	Azure CLI (az)
-	•	Google Cloud SDK (gcloud)
-	•	Optional interactive auth via environment variables
-
-⸻
-
-🔐 Stage 2 (Private Extensions)
-	•	Optional private repo execution
-	•	Uses authenticated gh
-	•	Keeps secrets out of public repo
-	•	Fully re-runnable
-
-⸻
-
-⚡ Quick Start
-
-macOS / Linux
-```
+```bash
 curl -fsSL https://raw.githubusercontent.com/vakermit/bootstrap/main/install.sh | bash
 ```
 
-⸻
+**Windows (PowerShell)**
 
-Windows (PowerShell)
-```
+```powershell
 iex (irm https://raw.githubusercontent.com/vakermit/bootstrap/main/install.ps1)
 ```
 
-⸻
+## What Gets Installed
 
-🧠 How It Works
+| Category | Tools |
+|----------|-------|
+| **Dev Tooling** | Git, GitHub CLI (gh), VS Code, iTerm2 (mac), Windows Terminal |
+| **Python** | pyenv, uv, Python 3.11, Python 3.14 |
+| **Containers** | Colima + kubectl (mac), Docker Engine (linux), Docker via WSL (win) |
+| **Cloud CLIs** | AWS CLI, Azure CLI, Google Cloud SDK |
 
-Stage 0 (Entrypoint)
-	•	Runs from curl / iex
-	•	Ensures git is installed
-	•	Clones this repo into a temporary directory
-	•	Logs output to:
+All installs are idempotent — safe to re-run at any time.
 
-~/bootstrap.log
+## How It Works
 
+The bootstrap runs in stages:
 
-⸻
+| Stage | What Happens |
+|-------|-------------|
+| **0 — Entry** | `curl`/`iex` ensures git is present, clones this repo to a temp dir, hands off to Stage 1 |
+| **1 — Core** | Installs package manager, dev tools, python, cloud CLIs, containers, VS Code extensions |
+| **2 — Private** | *(Optional)* Clones and runs a private repo for org-specific config, secrets, and tooling |
 
-Stage 1 (Core Bootstrap)
-	•	Installs package manager:
-	•	macOS → Homebrew
-	•	Linux → apt
-	•	Windows → Chocolatey
-	•	Installs base tooling:
-	•	git, gh, vscode
-	•	Configures terminals
+**`bsinstall`** — a standalone, repeatable installer for any GitHub repo that contains a `bootstrap.yml`. Run it anytime after the initial bootstrap to install additional repos:
 
-⸻
+```bash
+bin/bsinstall.sh owner/repo [ref]
+```
 
-Stage 2 (Optional Private Layer)
+## Configuration
 
-If configured, clones and runs a private repo:
+Set environment variables before running the installer to control optional behavior.
 
+```bash
+# Stage 2 — private repo (requires gh auth)
 export BOOTSTRAP_STAGE2_REPO=your-org/private-bootstrap
+export BOOTSTRAP_STAGE2_REF=main                          # optional, defaults to main
 
-Optional branch:
+# Cloud auth — trigger interactive login during install
+export DO_CLOUD_AUTH=1            # all three platforms
+export DO_CLOUD_AUTH_AWS=1        # aws configure
+export DO_CLOUD_AUTH_AZURE=1      # az login
+export DO_CLOUD_AUTH_GCP=1        # gcloud auth login
 
-export BOOTSTRAP_STAGE2_REF=main
+# Temp directory cleanup — remove the Stage 0 clone dir after install
+export BOOTSTRAP_CLEANUP=1        # default: keep temp dir
+```
 
+## Testing
 
-⸻
+```bash
+# Linux — runs full install in a disposable Docker container
+bash test/smoke.linux.sh
 
-🏗️ Project Structure
+# macOS — creates a temporary user for a clean-slate install
+sudo bash test/smoke.mac.sh            # creates user, prints credentials
+sudo bash test/smoke.mac.sh --cleanup  # removes user when done
+```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/architecture.md) | Stage design, module system, execution flow |
+| [Modules](docs/modules.md) | What each module installs and how |
+| [bsinstall](docs/bsinstall.md) | Standalone repo installer — usage, bootstrap.yml format |
+| [Configuration](docs/configuration.md) | Environment variables, package lists, customization |
+| [Testing](docs/testing.md) | Smoke tests, adding new tests, CI |
+| [Contributing](docs/contributing.md) | Guidelines for adding modules and submitting PRs |
+
+## Project Structure
 
 ```
 bootstrap/
-├── install.sh              # Stage 0 (curl entrypoint)
-├── install.ps1            # Stage 0 (Windows entrypoint)
-├── install.local.sh       # Stage 1 (main logic)
-├── install.local.ps1
+├── install.sh                # Stage 0 entry (curl | bash)
+├── install.ps1               # Stage 0 entry (iex)
+├── bin/
+│   └── bsinstall.sh          # Standalone repo installer (repeatable)
+├── install.local.sh          # Stage 1 orchestrator (mac/linux)
+├── install.local.ps1         # Stage 1 orchestrator (windows)
 ├── core/
-│   └── utils.sh
+│   └── utils.sh              # Shared shell helpers
 ├── modules/
-│   ├── mac.sh
-│   ├── linux.sh
-│   ├── common_dev.sh
-│   ├── python.sh
-│   ├── gh/
-│   │   ├── gh.sh
-│   │   └── gh.ps1
-│   ├── docker/
-│   │   ├── mac.sh
-│   │   ├── linux.sh
-│   │   ├── windows.ps1
-│   │   └── vscode.sh
-│   ├── cloud/
-│   │   ├── cloud.sh
-│   │   └── cloud.ps1
-│   └── stage2/
-│       ├── stage2.sh
-│       └── stage2.ps1
+│   ├── mac.sh                # macOS: Homebrew, Xcode CLT, casks
+│   ├── linux.sh              # Linux: apt packages, VS Code
+│   ├── common_dev.sh         # Cross-platform dev tool verification
+│   ├── python.sh             # pyenv + uv (mac/linux)
+│   ├── python.ps1            # pyenv-win + uv (windows)
+│   ├── windows.ps1           # Chocolatey packages, WSL bootstrap
+│   ├── gh/                   # GitHub CLI authentication
+│   ├── cloud/                # AWS, Azure, GCP CLI install + auth
+│   ├── docker/               # Container runtime per platform
+│   ├── wsl/                  # WSL2 feature enablement (windows)
+│   └── stage2/               # Private repo clone + execution
 ├── packages/
-│   ├── brew.txt
-│   ├── apt.txt
-│   └── choco.txt
-└── .gitignore
+│   ├── brew.txt              # Homebrew formulae
+│   ├── apt.txt               # Debian/Ubuntu packages
+│   └── choco.txt             # Chocolatey packages
+├── test/
+│   ├── smoke.linux.sh        # Docker-based Linux smoke test
+│   └── smoke.mac.sh          # Temporary user macOS smoke test
+└── docs/
+    ├── architecture.md
+    ├── modules.md
+    ├── configuration.md
+    ├── testing.md
+    └── contributing.md
 ```
 
-⸻
+## Supported Platforms
 
-🔁 Idempotency
+| OS | Status |
+|----|--------|
+| macOS (Apple Silicon & Intel) | Full support |
+| Ubuntu / Debian | Full support |
+| WSL 2 | Full support |
+| Windows (native) | Partial — most tooling runs inside WSL |
 
-This project is designed to be safely re-run:
-	•	Checks before installing packages
-	•	Skips existing tools
-	•	Updates repos instead of recloning
-	•	Avoids overwriting configs
+## License
 
-⸻
-
-🧾 Logging
-
-All output is logged to:
-
-~/bootstrap.log
-
-Useful for:
-	•	debugging failures
-	•	auditing installs
-	•	rerun verification
-
-⸻
-
-🔐 Security Model
-	•	No secrets stored in repo
-	•	Authentication handled via gh
-	•	Private repos accessed securely
-	•	HTTPS enforced for git operations
-
-⸻
-
-⚙️ Configuration
-
-Stage 2 Repo
-
-export BOOTSTRAP_STAGE2_REPO=your-org/private-bootstrap
-
-Optional Branch
-
-export BOOTSTRAP_STAGE2_REF=dev
-
-Cloud Auth
-
-export DO_CLOUD_AUTH=1              # auth all three (aws, az, gcloud)
-
-Or individually:
-
-export DO_CLOUD_AUTH_AWS=1          # aws configure
-export DO_CLOUD_AUTH_AZURE=1        # az login
-export DO_CLOUD_AUTH_GCP=1          # gcloud auth login
-
-
-⸻
-
-🧪 Supported Environments
-
-OS	Status
-macOS	✅ Full support
-Linux (Ubuntu/Debian)	✅ Full support
-WSL	✅ Recommended
-Windows (native)	⚠️ Uses WSL for most tooling
-
-
-⸻
-
-⚠️ Known Notes
-	•	First run may require:
-	•	macOS: accepting Xcode CLI prompt
-	•	Windows: WSL install + restart
-	•	Python 3.14 may be installed as dev version
-	•	Docker group changes may require shell restart
-
-⸻
-
-🧭 Philosophy
-	•	🔁 Reproducible environments
-	•	🔐 Secure by default
-	•	🧩 Modular and extensible
-	•	🚫 Avoid vendor lock-in (no Docker Desktop)
-	•	⚡ Fast developer onboarding
-
-⸻
-
-🚀 Future Improvements
-	•	Profiles (dev, minimal, full)
-	•	Dry-run mode
-	•	Structured logging
-	•	Config-driven module toggles
-	•	Multi-repo Stage 2 support
-
-⸻
-
-🤝 Contributing
-
-PRs welcome! Please keep:
-	•	idempotency intact
-	•	modules isolated
-	•	no secrets or personal configs
-
-⸻
-
-📄 License
-
-MIT (recommended)
-
-⸻
-
-🧠 Final Thought
-
-This isn’t just a setup script—it’s a portable development platform foundation.
-
-Run it on any machine and get back to building immediately.
-:::
+MIT
