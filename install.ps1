@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$REPO_URL = "https://github.com/YOUR_USERNAME/bootstrap.git"
+$REPO_URL = "https://github.com/vakermit/bootstrap.git"
 $BRANCH = "main"
 $TMP_DIR = Join-Path $env:TEMP ("bootstrap-" + [guid]::NewGuid())
 $LOG_FILE = "$env:USERPROFILE\bootstrap.log"

@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/YOUR_USERNAME/bootstrap.git"
+REPO_URL="https://github.com/vakermit/bootstrap.git"
 BRANCH="main"
 
 LOG_FILE="${HOME}/bootstrap.log"
 TMP_DIR="$(mktemp -d -t bootstrap-XXXX)"
+
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "== Bootstrap Stage 0 ==" | tee -a "$LOG_FILE"
 echo "Temp dir: $TMP_DIR" | tee -a "$LOG_FILE"

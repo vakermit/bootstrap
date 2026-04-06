@@ -1,7 +1,5 @@
 git
 gh
-python@3.11
-python@3.14
 wget
 curl
 jq
@@ -11,3 +9,4 @@ sqlite3
 xz
 zlib
 tcl-tk
+python3

@@ -61,14 +61,14 @@ This project provides a clean, repeatable way to go from a fresh machine → ful
 
 macOS / Linux
 ```
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/bootstrap/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/vakermit/bootstrap/main/install.sh | bash
 ```
 
 ⸻
 
 Windows (PowerShell)
 ```
-iex (irm https://raw.githubusercontent.com/YOUR_USERNAME/bootstrap/main/install.ps1)
+iex (irm https://raw.githubusercontent.com/vakermit/bootstrap/main/install.ps1)
 ```
 
 ⸻

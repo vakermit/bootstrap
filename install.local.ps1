@@ -1,4 +1,4 @@
-Write-Host "== Master Installer starting (Windows) =="
+Write-Host "== Bootstrap Stage 1 starting (Windows) =="
 
 
 # -------------------------------
@@ -29,10 +29,10 @@ if (-not (Test-WSLInstalled)) {
     if (-not $isAdmin) {
         Write-Warning "Administrator privileges are required to install WSL."
         Write-Host "Launching elevated PowerShell to run WSL bootstrap..."
-        
+
         # Launch new elevated PowerShell to run WSL bootstrap only, no loops
         Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$wslBootstrap`""
-        
+
         Write-Host "Please wait for WSL bootstrap to complete, then re-run this installer."
         exit 0
     }
@@ -56,10 +56,16 @@ else {
 # Base Windows setup
 .\modules\windows.ps1
 
+# GitHub CLI auth
+.\modules\gh\gh.ps1
+
 # Python
 .\modules\python.ps1
 
 # Docker
 .\modules\docker\windows.ps1
 
-Write-Host "== Master Installer complete =="
+# Stage 2 (optional private repo)
+.\modules\stage2\stage2.ps1
+
+Write-Host "== Bootstrap Stage 1 complete =="

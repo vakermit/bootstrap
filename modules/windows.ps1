@@ -26,4 +26,4 @@ if (-not (wsl --status 2>$null)) {
 }
 
 # Run Linux bootstrap inside WSL
-wsl -e bash -c "curl -fsSL https://your-repo/install.sh | bash"
+wsl -e bash -c "curl -fsSL https://raw.githubusercontent.com/vakermit/bootstrap/main/install.sh | bash"

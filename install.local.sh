@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-echo "== Master Linux starting =="
+# Ensure we run from the repo root regardless of how we were invoked
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
+source core/utils.sh
+
+echo "== Bootstrap Stage 1 starting =="
 
 OS="$(uname)"
 
@@ -22,6 +28,9 @@ esac
 # Shared dev tools
 bash modules/common_dev.sh
 
+# GitHub CLI auth
+bash modules/gh/gh.sh
+
 # Python (pyenv + uv)
 bash modules/python.sh
 
@@ -37,4 +46,7 @@ esac
 
 bash modules/docker/vscode.sh
 
-echo "== Bootstrap complete =="
+# Stage 2 (optional private repo)
+bash modules/stage2/stage2.sh
+
+echo "== Bootstrap Stage 1 complete =="

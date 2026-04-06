@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+source core/utils.sh
 
 echo "== Python (pyenv + uv) =="
 
