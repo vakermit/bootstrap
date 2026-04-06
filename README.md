@@ -49,6 +49,14 @@ This project provides a clean, repeatable way to go from a fresh machine → ful
 
 ⸻
 
+☁️ Cloud CLIs
+	•	AWS CLI (aws)
+	•	Azure CLI (az)
+	•	Google Cloud SDK (gcloud)
+	•	Optional interactive auth via environment variables
+
+⸻
+
 🔐 Stage 2 (Private Extensions)
 	•	Optional private repo execution
 	•	Uses authenticated gh
@@ -133,6 +141,9 @@ bootstrap/
 │   │   ├── linux.sh
 │   │   ├── windows.ps1
 │   │   └── vscode.sh
+│   ├── cloud/
+│   │   ├── cloud.sh
+│   │   └── cloud.ps1
 │   └── stage2/
 │       ├── stage2.sh
 │       └── stage2.ps1
@@ -185,6 +196,16 @@ export BOOTSTRAP_STAGE2_REPO=your-org/private-bootstrap
 Optional Branch
 
 export BOOTSTRAP_STAGE2_REF=dev
+
+Cloud Auth
+
+export DO_CLOUD_AUTH=1              # auth all three (aws, az, gcloud)
+
+Or individually:
+
+export DO_CLOUD_AUTH_AWS=1          # aws configure
+export DO_CLOUD_AUTH_AZURE=1        # az login
+export DO_CLOUD_AUTH_GCP=1          # gcloud auth login
 
 
 ⸻

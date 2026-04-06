@@ -62,6 +62,9 @@ else {
 # Python
 .\modules\python.ps1
 
+# Cloud CLIs (aws, az, gcloud)
+.\modules\cloud\cloud.ps1
+
 # Docker
 .\modules\docker\windows.ps1
 

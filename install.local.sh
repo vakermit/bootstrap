@@ -34,6 +34,9 @@ bash modules/gh/gh.sh
 # Python (pyenv + uv)
 bash modules/python.sh
 
+# Cloud CLIs (aws, az, gcloud)
+bash modules/cloud/cloud.sh
+
 # Docker (late stage)
 case "$OS" in
   Darwin)
