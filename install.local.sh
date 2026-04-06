@@ -11,6 +11,13 @@ echo "== Bootstrap Stage 1 starting =="
 
 OS="$(uname)"
 
+# Detect WSL
+IS_WSL=false
+if [ -f /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
+  IS_WSL=true
+  echo "WSL environment detected"
+fi
+
 # Core modules
 case "$OS" in
   Darwin)
@@ -38,16 +45,26 @@ bash modules/python.sh
 bash modules/cloud/cloud.sh
 
 # Docker (late stage)
-case "$OS" in
-  Darwin)
-    bash modules/docker/mac.sh
-    ;;
-  Linux)
-    bash modules/docker/linux.sh
-    ;;
-esac
+# In WSL, skip native Docker — Docker Desktop integration is preferred
+if [ "$IS_WSL" = true ]; then
+  echo "Skipping native Docker install in WSL (use Docker Desktop integration)"
+else
+  case "$OS" in
+    Darwin)
+      bash modules/docker/mac.sh
+      ;;
+    Linux)
+      bash modules/docker/linux.sh
+      ;;
+  esac
+fi
 
 bash modules/docker/vscode.sh
+
+# WSL-specific setup (systemd, interop, DNS)
+if [ "$IS_WSL" = true ]; then
+  bash modules/wsl/linux.sh
+fi
 
 # Stage 2 (optional private repo)
 bash modules/stage2/stage2.sh

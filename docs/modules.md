@@ -22,7 +22,7 @@ Each module is a self-contained script responsible for one tool or concern. Modu
 - Installs Chocolatey if missing.
 - Installs all packages from `packages/choco.txt`.
 - Installs WSL with Ubuntu if not present.
-- Runs the Linux bootstrap inside WSL.
+- Clones the bootstrap repo into WSL and runs `install.local.sh`, which detects the WSL environment and adjusts behavior (skips snap VS Code, skips native Docker, runs `modules/wsl/linux.sh`).
 
 ### `modules/wsl/wsl-bootstrap.ps1`
 
@@ -30,6 +30,16 @@ Each module is a self-contained script responsible for one tool or concern. Modu
 - Checks for pending reboots before and after.
 - Installs/updates the WSL2 kernel.
 - Sets WSL2 as default version.
+
+### `modules/wsl/linux.sh`
+
+WSL-specific setup that runs after the standard `linux.sh` module. Handles differences between native Linux and WSL:
+
+- **systemd** — Enables systemd in `/etc/wsl.conf` if not already configured (requires WSL 2.0+).
+- **VS Code** — Verifies that Windows VS Code is accessible via PATH interop (snap doesn't work in WSL).
+- **Docker** — Detects Docker Desktop WSL integration. Native Docker install is skipped in WSL to avoid conflicts.
+- **DNS** — Warns if `/etc/resolv.conf` is auto-generated and offers the fix.
+- **PATH interop** — Notes that Windows PATH leaks into WSL by default and how to disable it.
 
 ## Dev Tool Modules
 
@@ -87,6 +97,7 @@ Without these variables set, only the CLIs are installed — no interactive prom
 
 - Installs Docker Engine via the official `get.docker.com` script.
 - Adds the current user to the `docker` group (requires shell restart to take effect).
+- **Skipped in WSL** — `install.local.sh` detects WSL and skips this module to avoid conflicts with Docker Desktop WSL integration.
 
 ### `modules/docker/windows.ps1`
 

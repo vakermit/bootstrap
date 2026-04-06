@@ -25,5 +25,6 @@ if (-not (wsl --status 2>$null)) {
     wsl --install -d Ubuntu
 }
 
-# Run Linux bootstrap inside WSL
-wsl -e bash -c "curl -fsSL https://raw.githubusercontent.com/vakermit/bootstrap/main/install.sh | bash"
+# Run Linux bootstrap inside WSL (clone + run local installer so WSL detection works)
+$repoUrl = "https://github.com/vakermit/bootstrap.git"
+wsl -e bash -c "git clone --depth 1 $repoUrl /tmp/bootstrap-wsl 2>/dev/null || git -C /tmp/bootstrap-wsl pull; cd /tmp/bootstrap-wsl && bash install.local.sh"

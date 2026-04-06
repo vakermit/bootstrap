@@ -16,17 +16,20 @@ curl | bash  ──→  install.sh (Stage 0)
                     ├── clone repo to temp dir
                     └── exec install.local.sh (Stage 1)
                           │
-                          ├── mac.sh / linux.sh      (platform packages)
-                          ├── common_dev.sh           (verify dev tools)
-                          ├── gh/gh.sh                (GitHub CLI auth)
-                          ├── python.sh               (pyenv + uv)
-                          ├── cloud/cloud.sh          (aws, az, gcloud)
-                          ├── docker/{platform}.sh    (container runtime)
-                          ├── docker/vscode.sh        (container extensions)
-                          └── stage2/stage2.sh        (optional private repo)
+                          ├── detect WSL (sets IS_WSL flag)
+                          ├── mac.sh / linux.sh        (platform packages)
+                          │     └── linux.sh skips snap VS Code on WSL
+                          ├── common_dev.sh             (verify dev tools)
+                          ├── gh/gh.sh                  (GitHub CLI auth)
+                          ├── python.sh                 (pyenv + uv)
+                          ├── cloud/cloud.sh            (aws, az, gcloud)
+                          ├── docker/{platform}.sh      (skipped on WSL)
+                          ├── docker/vscode.sh          (container extensions)
+                          ├── wsl/linux.sh              (WSL only: systemd, interop, DNS)
+                          └── stage2/stage2.sh          (optional private repo)
 ```
 
-The Windows path mirrors this with `.ps1` equivalents, plus a WSL preflight step.
+The Windows path (`install.local.ps1`) runs the Windows-native modules, then clones the repo into WSL and runs `install.local.sh` inside it — which detects the WSL environment and adjusts automatically.
 
 ## Stage 0 — Entry
 
