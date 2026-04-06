@@ -1,0 +1,6 @@
+git
+gh
+vscode
+python311
+python
+windows-terminal
