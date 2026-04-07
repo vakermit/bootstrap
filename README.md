@@ -12,7 +12,12 @@ One command takes a fresh machine to a fully configured dev environment.
 curl -fsSL https://raw.githubusercontent.com/vakermit/bootstrap/main/install.sh | bash
 ```
 
-**Windows (PowerShell)**
+**Windows (PowerShell — run as Administrator)**
+
+> **Recommended:** Right-click PowerShell and choose **Run as Administrator**.
+> Many tools (Chocolatey, WSL, cloud CLIs) require admin privileges. Running as
+> admin lets everything install smoothly in one pass. If you run as a standard
+> user, each admin-requiring install will open a separate UAC elevation prompt.
 
 ```powershell
 iex (irm https://raw.githubusercontent.com/vakermit/bootstrap/main/install.ps1)
