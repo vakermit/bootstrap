@@ -1,25 +1,25 @@
 Write-Host "== Cloud CLIs =="
 
+# Load shared utilities (provides Ensure-ChocoPackage with auto-elevation)
+. "$PSScriptRoot\..\..\core\utils.ps1"
+
 # ── AWS CLI ──────────────────────────────────────────────
 if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing AWS CLI..."
-    choco install awscli -y
+    Ensure-ChocoPackage "awscli"
 } else {
     Write-Host "AWS CLI already installed"
 }
 
 # ── Azure CLI ────────────────────────────────────────────
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing Azure CLI..."
-    choco install azure-cli -y
+    Ensure-ChocoPackage "azure-cli"
 } else {
     Write-Host "Azure CLI already installed"
 }
 
 # ── Google Cloud SDK ─────────────────────────────────────
 if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing Google Cloud SDK..."
-    choco install gcloudsdk -y
+    Ensure-ChocoPackage "gcloudsdk"
 } else {
     Write-Host "Google Cloud SDK already installed"
 }

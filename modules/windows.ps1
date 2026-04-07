@@ -1,23 +1,18 @@
 Write-Host "== Windows setup =="
 
-function Ensure-Choco {
-    if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-        Set-ExecutionPolicy Bypass -Scope Process -Force
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+# Load shared utilities (provides Ensure-ChocoPackage with auto-elevation)
+. "$PSScriptRoot\..\core\utils.ps1"
+
+# Install choco packages from list
+$chocoList = Join-Path $PSScriptRoot "..\packages\choco.txt"
+if (Test-Path $chocoList) {
+    Get-Content $chocoList | Where-Object { $_ -match '\S' } | ForEach-Object {
+        Ensure-ChocoPackage $_
     }
 }
-
-function Ensure-Package {
-    param ($pkg)
-    if (-not (choco list --local-only | Select-String $pkg)) {
-        choco install $pkg -y
-    }
-}
-
-Ensure-Choco
-
-Get-Content "packages/choco.txt" | ForEach-Object {
-    Ensure-Package $_
+else {
+    Write-Host "  ! " -ForegroundColor Yellow -NoNewline
+    Write-Host "packages/choco.txt not found — skipping choco packages"
 }
 
 # WSL

@@ -1,12 +1,23 @@
 Write-Host "== Bootstrap Stage 1 starting (Windows) =="
 
+# Load shared utilities (Test-IsAdmin, Invoke-Elevated, Ensure-ChocoPackage, etc.)
+. "$PSScriptRoot\core\utils.ps1"
+
+# Show admin status
+if (Test-IsAdmin) {
+    Write-Host "  + " -ForegroundColor Green -NoNewline
+    Write-Host "Running as Administrator — all installs will run inline"
+}
+else {
+    Write-Host "  i " -ForegroundColor Blue -NoNewline
+    Write-Host "Running as standard user — admin tools (Chocolatey, etc.) will prompt for elevation"
+}
 
 # -------------------------------
 # WSL Preflight / Bootstrap Check
 # -------------------------------
 
-# Path to your WSL bootstrap script
-$wslBootstrap = ".\modules\wsl\wsl-bootstrap.ps1"
+$wslBootstrap = Join-Path $PSScriptRoot "modules\wsl\wsl-bootstrap.ps1"
 
 function Test-WSLInstalled {
     try {
@@ -20,30 +31,20 @@ function Test-WSLInstalled {
 
 # Only run if WSL is missing
 if (-not (Test-WSLInstalled)) {
-
     Write-Host "WSL is not installed. Preparing to bootstrap WSL..."
 
-    # Check if running as administrator
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole] "Administrator")
+    $wslScript = Get-Content $wslBootstrap -Raw
+    $ok = Invoke-Elevated -Description "Install WSL" -ScriptContent $wslScript
 
-    if (-not $isAdmin) {
-        Write-Warning "Administrator privileges are required to install WSL."
-        Write-Host "Launching elevated PowerShell to run WSL bootstrap..."
-
-        # Launch new elevated PowerShell to run WSL bootstrap only, no loops
-        Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$wslBootstrap`""
-
-        Write-Host "Please wait for WSL bootstrap to complete, then re-run this installer."
-        exit 0
+    if (-not $ok) {
+        Write-Host "  x " -ForegroundColor Red -NoNewline
+        Write-Host "WSL bootstrap failed. You may need to reboot and re-run."
+        exit 1
     }
 
-    # Already admin, run bootstrap directly
-    Write-Host "Running WSL bootstrap..."
-    & $wslBootstrap
-
-    # WSL should now be installed
     if (-not (Test-WSLInstalled)) {
-        Write-Error "WSL bootstrap did not complete successfully. Exiting."
+        Write-Host "  ! " -ForegroundColor Yellow -NoNewline
+        Write-Host "WSL may require a reboot. Please restart and re-run this installer."
         exit 1
     }
 
@@ -53,22 +54,22 @@ else {
     Write-Host "WSL already installed. Skipping WSL bootstrap."
 }
 
-# Base Windows setup
-.\modules\windows.ps1
+# Base Windows setup (Chocolatey packages — auto-elevates per package)
+. "$PSScriptRoot\modules\windows.ps1"
 
 # GitHub CLI auth
-.\modules\gh\gh.ps1
+. "$PSScriptRoot\modules\gh\gh.ps1"
 
 # Python
-.\modules\python.ps1
+. "$PSScriptRoot\modules\python.ps1"
 
-# Cloud CLIs (aws, az, gcloud)
-.\modules\cloud\cloud.ps1
+# Cloud CLIs (aws, az, gcloud — auto-elevates for choco installs)
+. "$PSScriptRoot\modules\cloud\cloud.ps1"
 
 # Docker
-.\modules\docker\windows.ps1
+. "$PSScriptRoot\modules\docker\windows.ps1"
 
 # Stage 2 (optional private repo)
-.\modules\stage2\stage2.ps1
+. "$PSScriptRoot\modules\stage2\stage2.ps1"
 
 Write-Host "== Bootstrap Stage 1 complete =="
