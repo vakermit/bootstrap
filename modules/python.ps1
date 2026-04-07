@@ -1,14 +1,42 @@
 Write-Host "== Python (pyenv-win + uv) =="
 
+# Load shared utilities
+. "$PSScriptRoot\..\core\utils.ps1"
+
 # pyenv-win
 if (-not (Get-Command pyenv -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing pyenv-win..."
-    Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "$env:TEMP\install-pyenv-win.ps1"
-    & "$env:TEMP\install-pyenv-win.ps1"
+    $pyenvRoot = "$env:USERPROFILE\.pyenv\pyenv-win"
+
+    if (Test-Path "$pyenvRoot\bin\pyenv.bat") {
+        Write-Host "pyenv-win found at $pyenvRoot but not on PATH — adding..."
+    }
+    else {
+        Write-Host "Installing pyenv-win via git clone..."
+        $pyenvParent = "$env:USERPROFILE\.pyenv"
+        if (Test-Path $pyenvParent) {
+            Remove-Item -Recurse -Force $pyenvParent
+        }
+        git clone https://github.com/pyenv-win/pyenv-win.git $pyenvParent
+    }
 
     # Add to current session PATH
-    $env:PATH = "$env:USERPROFILE\.pyenv\pyenv-win\bin;$env:USERPROFILE\.pyenv\pyenv-win\shims;$env:PATH"
-} else {
+    $env:PYENV = $pyenvRoot
+    $env:PYENV_HOME = $pyenvRoot
+    $env:PATH = "$pyenvRoot\bin;$pyenvRoot\shims;$env:PATH"
+
+    # Persist to user PATH for future sessions
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    $toAdd = @("$pyenvRoot\bin", "$pyenvRoot\shims")
+    foreach ($p in $toAdd) {
+        if ($userPath -notlike "*$p*") {
+            $userPath = "$p;$userPath"
+        }
+    }
+    [Environment]::SetEnvironmentVariable('Path', $userPath, 'User')
+    [Environment]::SetEnvironmentVariable('PYENV', $pyenvRoot, 'User')
+    [Environment]::SetEnvironmentVariable('PYENV_HOME', $pyenvRoot, 'User')
+}
+else {
     Write-Host "pyenv already installed"
 }
 
