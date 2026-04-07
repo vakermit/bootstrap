@@ -78,21 +78,25 @@ function Ensure-ChocoPackage {
     <#
     .SYNOPSIS
       Install a Chocolatey package, elevating to admin if needed.
+      Checks if already installed BEFORE any admin elevation.
     #>
     param([Parameter(Mandatory)][string]$Package)
 
+    # Check if already installed — no admin needed for this check
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        $installed = choco list --local-only 2>$null | Select-String "^$Package\s"
+        if ($installed) {
+            Write-Host "  + " -ForegroundColor Green -NoNewline
+            Write-Host "$Package already installed"
+            return $true
+        }
+    }
+
+    # Only now ensure Chocolatey itself (may need admin)
     if (-not (Ensure-Choco)) {
         Write-Host "  x " -ForegroundColor Red -NoNewline
         Write-Host "Chocolatey not available — cannot install $Package"
         return $false
-    }
-
-    # Check if already installed
-    $installed = choco list --local-only 2>$null | Select-String "^$Package\s"
-    if ($installed) {
-        Write-Host "  + " -ForegroundColor Green -NoNewline
-        Write-Host "$Package already installed"
-        return $true
     }
 
     Write-Host "Installing $Package via Chocolatey..."
